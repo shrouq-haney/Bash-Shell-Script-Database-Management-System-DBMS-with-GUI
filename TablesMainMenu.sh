@@ -13,8 +13,10 @@ function TablesMainMenu {
             "🔎 Select from Table" "Retrieve data from a table" \
             "🗑️ Delete from Table" "Remove records from a table" \
             "✏️ Update Table" "Modify existing data in a table" \
+            "🛠️ Alter Table" "Modify the structure of a table" \
             "↩️ Go back to Database Main Menu" "Return to main menu" \
-            --height=400 --width=500 --hide-header)
+            "🚪 Exit" "Close the program" \
+            --height=500 --width=500 --hide-header)
 
         if [[ -z "$choice" ]]; then
             return  
@@ -26,9 +28,11 @@ function TablesMainMenu {
             "❌ Drop Table") DropTable ;;
             "📥 Insert into Table") insertTable ;;
             "🔎 Select from Table") selectFromTable ;;
-            "🗑️ Delete from Table") DeleteFromTable ;;
+            "🗑️ Delete from Table") deleteFromTable ;;
             "✏️ Update Table") UpdateTable ;;
+            "🛠️ Alter Table") alterTable ;;  
             "↩️ Go back to Database Main Menu") dbMainMenu ;;
+            "🚪 Exit") exit 0 ;;
             *) zenity --error --text="❌ Invalid choice! Please try again." ;;
         esac
     done

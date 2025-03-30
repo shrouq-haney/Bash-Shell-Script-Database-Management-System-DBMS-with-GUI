@@ -11,7 +11,7 @@ function dbMainMenu {
             "🗑️ Drop Database" "Delete an existing database" \
             "🗃️ Show Databases" "Show all existing databases" \
             "💻 Execute SQL Query" "Run an SQL query" \
-            "❌ Exit" "Close the program")
+            "🚪 Exit" "Close the program")
 	
         case $choice in
             "📂 Select Database") selectDB ;;  
@@ -20,9 +20,10 @@ function dbMainMenu {
             "🗑️ Drop Database") dropDB ;;  
             "🗃️ Show Databases") showDBs ;;  
             "💻 Execute SQL Query") executeSQL ;;  
-            "❌ Exit") zenity --info --text="👋 Exiting, Goodbye!"; exit 0 ;;  
-            *) zenity --error --text="❌ Invalid option! Please select a valid choice." ;;  
+            "🚪 Exit") zenity --info --text="👋 Exiting, Goodbye!"; exit 0 ;;  
+            *)  welcomeScreen
+                return
+                ;; 
         esac
     done
 }
-

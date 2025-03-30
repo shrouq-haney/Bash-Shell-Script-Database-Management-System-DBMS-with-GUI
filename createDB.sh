@@ -1,33 +1,33 @@
-#!/bin/bash
+#! /bin/bash
 
 function createDB {
-    while true; do
-        dbname=$(zenity --entry --title="📂 Create Database" --text="Enter the database name or 1 to return back")
+    clear
 
-        
-        if [[ $? -ne 0 ]]; then  
+
+    while true; do
+        dbname=$(zenity --entry --title="➕ CREATE A NEW DATABASE " --text="Enter the database name or type 'exit' to return:" 2>/dev/null)
+
+        if [[ -z "$dbname" ]]; then
             dbMainMenu
-            return
         fi
 
-        if [[ "$dbname" == "1" ]]; then
+        if [[ "$dbname" == "exit" ]]; then
+            dbMainMenu
             return
         fi
 
         validateDBName "$dbname"
         if [[ $? -ne 0 ]]; then
-            zenity --error --text="❌ Error: Invalid database name."
-            continue
+            continue  
         fi
 
         if [[ -d "$DB_MAIN_DIR/$dbname" ]]; then
-            zenity --error --text="❌ Error: Database '$dbname' already exists."
+            zenity --error --title="Error" --text="❌ Database '$dbname' already exists."
             continue
         fi
 
         mkdir "$DB_MAIN_DIR/$dbname"
-        zenity --info --title="🎉 congratulations" --text="✅ Database '$dbname' has been created successfully! 🎉"
-        continue
+        zenity --info --title="Success" --text="✅ Database '$dbname' has been created successfully! 🎉"
     done
 }
 

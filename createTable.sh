@@ -1,33 +1,27 @@
-#! /bin/bash
+#!/bin/bash
 
 function createTable {
     clear
-    echo "=========================================="
-    echo "➕ Create Tables in [$dbname]  ➕"
-    echo "=========================================="
-	
-    read -p "Enter the number of tables to create: " table_count                     #suggestion : to let him specify the number of tables he will enter
-    if [[ "$table_count" -le 0 ]]; then
-        echo -e "${RED} Invalid number of tables!${NC}"
-        return
-    fi
 
-    for (( i = 1; i <= table_count; i++ )); 
-    	do
-        read -p "Enter table name or type 'exit' : " tablename
-        [[ "$tablename" == "exit" ]] && return
+
+    while true; do 
+        tablename=$(zenity --entry --title="➕ Create Table ➕" --text="Enter table name or type 'exit':")
+        [[ "$tablename" == "exit" ]] && TablesMainMenu && return
+        	[[ -z "$tablename" ]] &&TablesMainMenu && return
+        validatetablename "$tablename"
+        [[ $? -ne 0 ]] && continue  
 
         TABLE_PATH="$DB_MAIN_DIR/$dbname/$tablename.xml"
         META_PATH="$DB_MAIN_DIR/$dbname/${tablename}_meta.xml"
 
         if [[ -f "$TABLE_PATH" ]]; then
-            echo -e "${RED}  Table '$tablename' already exists!${NC}"
+            zenity --error --text="Table '$tablename' already exists!"
             continue
         fi
 
-        read -p "Enter number of columns: " col_count
-        if [[ "$col_count" -le 0 ]]; then
-            echo -e "${RED}  Invalid Column Count!${NC}"
+        col_count=$(zenity --entry --title="Column Count" --text="Enter number of columns:")
+        if ! [[ "$col_count" =~ ^[1-9][0-9]*$ ]]; then
+            zenity --error --text="Column Count must be an integer!"
             continue
         fi
 
@@ -37,58 +31,40 @@ function createTable {
         echo "<TableMeta name=\"$tablename\">" >> "$META_PATH"
         echo "  <Columns count=\"$col_count\">" >> "$META_PATH"
 
-        primary_key_count=0  						#count number of primar_ key because it can be either 1 pk or 0 (for week entity )
-
+        primary_key_count=0  
+        
         for ((j = 1; j <= col_count; j++)); do
-            col_name=""
-            col_type=""
-
-            while [[ -z "$col_name" ]]; do
-                read -p "Column $j Name 'cannot be empty' : " col_name
-                [[ "$col_name" == "exit" ]] && echo -e "${RED}  Table creation canceled.${NC}" && rm -f "$TABLE_PATH" "$META_PATH" && return
+            while true; do
+                col_name=$(zenity --entry --title="Column Name" --text="Enter column name:")
+                validateColumnname "$col_name"
+                [[ $? -ne 0 ]] && continue  
+                
+                col_type=$(zenity --list --title="Column Type" --text="Choose data type:" --column="Type" string int)
+                [[ -z "$col_type" ]] && zenity --error --text="Invalid choice, please select 'string' or 'int'" && continue
+                break
             done
 
-            while [[ ! "$col_type" =~ ^(string|int)$ ]]; do
-                read -p "Data Type (string/int): " col_type
-                [[ "$col_type" == "exit" ]] && echo -e "${RED}  Table creation canceled.${NC}" && rm -f "$TABLE_PATH" "$META_PATH" && return
-            done
+            is_pk=$(zenity --question --title="Primary Key" --text="Is this the Primary Key?" && echo "true" || echo "false")
+            [[ "$is_pk" == "true" ]] && ((primary_key_count++))
 
-            read -p "Is this the Primary Key? (Y/N): " is_pk
-            if [[ "$is_pk" =~ ^[Yy]$ ]]; then
-                if [[ "$primary_key_count" -eq 1 ]]; then
-                    echo -e "${RED}  Error: Only one Primary Key is allowed!${NC}"
-                    ((j--))
-                    continue
-                fi
-                is_pk="true"
-                ((primary_key_count++))
-            else
-                is_pk="false"
-            fi
-
-            read -p "Unique? (Y/N): " is_unique
-            [[ "$is_unique" =~ ^[Yy]$ ]] && is_unique="true" || is_unique="false"
-
-            read -p "Nullable? (Y/N): " is_nullable
-            [[ "$is_nullable" =~ ^[Yy]$ ]] && is_nullable="true" || is_nullable="false"
+            is_unique=$(zenity --question --title="Unique" --text="Should this column be unique?" && echo "true" || echo "false")
+            is_nullable=$(zenity --question --title="Nullable" --text="Can this column be NULL?" && echo "true" || echo "false")
 
             echo "<Column name=\"$col_name\" type=\"$col_type\" primaryKey=\"$is_pk\" unique=\"$is_unique\" nullable=\"$is_nullable\" />" >> "$META_PATH"
         done
 
-        if [[ "$primary_key_count" -eq 0 ]]; 
-        then
-        echo -e "${YELLOW} Warning: No Primary Key defined! Continue without PK? (Y/N) ${NC}"
-            read  choice
-            [[ ! "$choice" =~ ^[Yy]$ ]] && echo -e "${RED}  Table creation canceled${NC}" && rm -f "$TABLE_PATH" "$META_PATH" && return
+        if [[ "$primary_key_count" -eq 0 ]]; then
+            zenity --error --text="Error: No Primary Key defined! You must insert a PK."
+            rm -f "$TABLE_PATH" "$META_PATH" 
+            continue
         fi
 
         echo "  </Columns>" >> "$META_PATH"
         echo "</TableMeta>" >> "$META_PATH"
         echo "</Table>" >> "$TABLE_PATH"
 
-        echo -e "${GREEN} Table '$tablename' created successfully ${NC}"
-        
-       	return
+        zenity --info --text="Table '$tablename' created successfully! 🎉"
+        choice=$(zenity --list --title="Next Action" --text="What do you want to do next?" --column="Option" "Return to Main Menu" "Add Another Table")
+        [[ "$choice" == "Return to Main Menu" ]] && TablesMainMenu && return
     done
 }
-

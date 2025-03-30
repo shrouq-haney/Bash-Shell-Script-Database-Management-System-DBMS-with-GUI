@@ -1,30 +1,31 @@
 #!/bin/bash
 
 function selectDB {
-    if [[ ! -d "$DB_MAIN_DIR" || -z "$(ls -A "$DB_MAIN_DIR")" ]]; then
-        zenity --warning --text="⚠️ No databases found! Create one first."
+    clear
+
+    
+    dbname=$(zenity --list --title="🔗 CONNECT TO DATABASE 🔗" --column="🗃️ Available databases:)" $(ls -1 "$DB_MAIN_DIR") --width=400 --height=300)
+    
+    if [[ -z "$dbname" ]]; then
+        dbMainMenu
         return
     fi
-
-    dbname=$(zenity --list --title="🔗 Connect to Database" --column="🗃️Available Databases" $(ls -1 "$DB_MAIN_DIR") --height=300 --width=400)
-
-        if [[ $? -ne 0 ]]; then  
-            dbMainMenu
-            return
-        fi
-    if [[ -z "$dbname" ]]; then
+    
+    validateDBName "$dbname"
+    if [[ $? -ne 0 ]]; then
+        
         return
     fi
 
     if [[ -d "$DB_MAIN_DIR/$dbname" ]]; then
-        zenity --info --text="✅ Successfully connected to '$dbname'!"
+        zenity --info --title="Success" --text="✅ Successfully connected to '$dbname'! 🎉" --width=300
         TablesMainMenu
     else
-        zenity --error --text="❌ Error: Database '$dbname' does not exist."
-        zenity --question --text="Do you want to create a new database with this name?" --title="Create Database"
+        zenity --error --title="Error" --text="❌ Database '$dbname' does not exist." --width=300
         
+        to_create=$(zenity --question --title="Create Database" --text="Do you want to create a new database?" --width=300)
         if [[ $? -eq 0 ]]; then
-            createDB "$dbname"
+            createDB
         fi
     fi
 }

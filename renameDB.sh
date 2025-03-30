@@ -1,38 +1,42 @@
 #!/bin/bash
 
 function renameDB {
-    old_name=$(zenity --entry --title="🔄 Rename Database" --text="Enter the database name to rename or exit to return back")
+    clear
 
-        if [[ $? -ne 0 ]]; then  
+
+    while true; do
+        old_name=$(zenity --entry --title="✏️ RENAME DATABASE"\
+        --text="Enter the database name to rename or type 'exit' to return:")
+
+	if [[ -z "$dbname" ]]; then
+        dbMainMenu
+        return
+    fi
+        if [[ $? -ne 0 || $old_name == "exit" ]]; then
             dbMainMenu
             return
         fi
-    if [[ -z "$old_name" ]]; then
-        return
-    fi
 
-    if [[ ! -d "$DB_MAIN_DIR/$old_name" ]]; then
-        zenity --error --text="❌ Error: Database '$old_name' does not exist!"
-        return
-    fi
+        if [[ ! -d "$DB_MAIN_DIR/$old_name" ]]; then
+            zenity --error --title="❌ Error" --text="Database '$old_name' does not exist!"
+            continue
+        fi
 
-    new_name=$(zenity --entry --title="🔄 Rename Database" --text="Enter the new database name:")
+        new_name=$(zenity --entry --title="Enter New Database Name" --text="Enter the new database name:")
 
-    if [[ -z "$new_name" ]]; then
-        return
-    fi
-
-    if [[ -d "$DB_MAIN_DIR/$new_name" ]]; then
-        zenity --error --text="❌ Error: Database '$new_name' already exists!"
-        return
-    fi
-
-    zenity --question --text="Are you sure you want to rename '$old_name' to '$new_name'?" --title="Confirm Rename"
-    if [[ $? -eq 0 ]]; then
+        validateDBName "$new_name"
+        if [[ $? -ne 0 ]]; then
+            continue
+        fi
+        
+        if [[ -d "$DB_MAIN_DIR/$new_name" ]]; then
+            zenity --error --title="❌ Error" --text="Database '$new_name' already exists!"
+            continue
+        fi
+        
         mv "$DB_MAIN_DIR/$old_name" "$DB_MAIN_DIR/$new_name"
-        zenity --info --text="✅ Database renamed successfully from '$old_name' to '$new_name'!"
-    else
-        zenity --warning --text="⚠️ Operation canceled!"
-    fi
+        
+        zenity --info --title="✅ Success" --text="Database renamed successfully from '$old_name' to '$new_name'! 🎉"
+    done
 }
 
