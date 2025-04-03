@@ -2,7 +2,7 @@
 
 function alterTable {
     clear
-    zenity --info --title="Alter Table" --text="🛠️ Alter Table in $dbname 🛠️\n\n📌 Available Tables in $dbname:" --width=400
+
     
     tables=$(ls "$DB_MAIN_DIR/$dbname" | grep -E '^[^_]+\.xml$' | sed 's/.xml$//')
     if [[ -z "$tables" ]]; then
@@ -12,7 +12,7 @@ function alterTable {
     fi
 
     while true; do
-        dtb=$(zenity --list --title="Select Table" --column="Tables" $tables)
+        dtb=$(zenity --list --title="🛠️ Alter Table in $dbname " --column="Available Tables in $dbname :)" $tables)
         [[ -z "$dtb" ]] && TablesMainMenu && return
 
         TABLE_PATH="$DB_MAIN_DIR/$dbname/$dtb.xml"

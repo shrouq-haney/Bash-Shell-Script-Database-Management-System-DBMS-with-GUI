@@ -2,7 +2,7 @@
 
 function deleteFromTable {
     clear
-    zenity --info --title="Delete Row" --text="🗑️ Delete Row by Primary Key in $dbname"
+
     
     while true; do
         tables=$(ls "$DB_MAIN_DIR/$dbname" | grep -E '^[^_]+\.xml$' | sed 's/.xml$//')
@@ -12,7 +12,7 @@ function deleteFromTable {
             return
         fi
 
-        dtb=$(zenity --list --title="Select Table" --column="Tables" $tables)
+        dtb=$(zenity --list --title="🗑️ Delete Row by Primary Key in $dbname" --column="Available Tables in $dbname :)" $tables)
         [[ -z "$dtb" ]] && return
 
         TABLE_PATH="$DB_MAIN_DIR/$dbname/$dtb.xml"

@@ -60,9 +60,12 @@ function insertTable {
                 zenity --error --text="❌ $col_name must contain only numbers!"
                 continue
             fi
-            if [[ "$is_unique" == "true" && -n "$col_value" && $(grep -q "<$col_name>$col_value</$col_name>" "$TABLE_PATH") ]]; then
+          
+            if [[ "$is_unique" == "true" && -n "$col_value" ]]; then
+                if grep -q "<$col_name>$col_value</$col_name>" "$TABLE_PATH"; then
                 zenity --error --text="❌ Value for $col_name must be unique!"
-                continue
+                    continue
+                fi
             fi
             row_values+=("$col_value")
             break

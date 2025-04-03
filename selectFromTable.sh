@@ -2,7 +2,7 @@
 
 function selectFromTable {
     while true; do
-        # 🟢 الحصول على قائمة الجداول
+        # 🟢 جلب أسماء الجداول
         tables=($(ls "$DB_MAIN_DIR/$dbname" | grep -E '^[^_]+\.xml$' | sed 's/.xml$//'))
 
         if [[ ${#tables[@]} -eq 0 ]]; then
@@ -10,7 +10,7 @@ function selectFromTable {
             return
         fi
 
-        # 🟢 عرض الجداول في قائمة Zenity
+        # 🟢 عرض الجداول للاختيار
         tablename=$(zenity --list --title "Select a Table" --column "Tables" "${tables[@]}")
         [[ -z "$tablename" ]] && return  
 
@@ -50,12 +50,13 @@ function selectFromTable {
                     row = "";
                     for (i in cols) {
                         field = cols[i];
-                        value = "N/A";
+                        value = "";
                         match($0, "<" field ">[^<]+</" field ">");
                         if (RSTART) {
                             value = substr($0, RSTART + length("<" field ">"), RLENGTH - length("<" field ">") - length("</" field ">"));
                         }
-                        row = row value "\n";  
+                        if (value == "") value = "N/A";
+                        row = row value " ";
                     }
                     print row;
                     found=1;
@@ -70,14 +71,15 @@ function selectFromTable {
                 row = "";
                 for (i in cols) {
                     field = cols[i];
-                    value = "N/A";
+                    value = "";
                     match($0, "<" field ">[^<]+</" field ">");
                     if (RSTART) {
                         value = substr($0, RSTART + length("<" field ">"), RLENGTH - length("<" field ">") - length("</" field ">"));
                     }
+                    if (value == "") value = "N/A";
                     row = row value " ";
                 }
-                print row;
+                print row;	
             }
             ' "$TABLE_PATH")
         fi
@@ -88,8 +90,8 @@ function selectFromTable {
         else
             zenity --list --title "Table Data" --width=800 --height=500 \
                 --text "This is the data stored in the table:" \
-                --column="${column_names[@]}" \
-                $(echo "$results" | tr '\n' ' ')
+                $(for col in "${column_names[@]}"; do echo "--column=$col"; done) \
+                $(echo "$results")
         fi
     done
 }

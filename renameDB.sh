@@ -5,13 +5,11 @@ function renameDB {
 
 
     while true; do
+    
         old_name=$(zenity --entry --title="✏️ RENAME DATABASE"\
         --text="Enter the database name to rename or type 'exit' to return:")
 
-	if [[ -z "$dbname" ]]; then
-        dbMainMenu
-        return
-    fi
+	
         if [[ $? -ne 0 || $old_name == "exit" ]]; then
             dbMainMenu
             return
@@ -33,6 +31,7 @@ function renameDB {
             zenity --error --title="❌ Error" --text="Database '$new_name' already exists!"
             continue
         fi
+        
         
         mv "$DB_MAIN_DIR/$old_name" "$DB_MAIN_DIR/$new_name"
         

@@ -7,9 +7,7 @@ function createDB {
     while true; do
         dbname=$(zenity --entry --title="➕ CREATE A NEW DATABASE " --text="Enter the database name or type 'exit' to return:" 2>/dev/null)
 
-        if [[ -z "$dbname" ]]; then
-            dbMainMenu
-        fi
+       
 
         if [[ "$dbname" == "exit" ]]; then
             dbMainMenu
